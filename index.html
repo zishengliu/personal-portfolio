@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="刘子声个人主页｜产品、数据、AI策略与法律研究" />
-<meta name="theme-color" content="#0b0d12" />
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="刘子声个人主页｜产品、数据、AI策略与法律研究" /><meta name="theme-color" content="#0b0d12" />
 <title>刘子声 · Product × Data × AI × Law</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css" />
+<style>
+.nav-actions{display:flex;align-items:center;gap:8px}.company-line{display:flex;align-items:center;gap:14px}.company-logo{width:48px;height:48px;object-fit:contain;border-radius:12px;background:#fff;padding:7px;border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18)}.kuaishou-logo{padding:9px}.meituan-logo{padding:0}.edu-item{display:flex;align-items:center;gap:18px}.edu-item img{width:58px;height:58px;object-fit:contain;flex:none;border-radius:50%;background:#fff;padding:7px;border:1px solid var(--line)}.edu-item h3{margin:0 0 4px}.edu-item p{margin:0}.edu-divider{height:1px;background:var(--line);margin:25px 0}.theme-light .company-logo,.theme-light .edu-item img{background:#fff}.theme-light .company-logo{box-shadow:0 8px 24px rgba(17,24,39,.10)}
+@media(max-width:520px){.company-line{gap:10px}.company-logo{width:42px;height:42px}.edu-item img{width:50px;height:50px}}
+</style>
 </head>
 <body>
 <div class="bg-grid"></div>
@@ -20,4 +22,16 @@
 <section id="skills" class="section container"><div class="section-head reveal"><span>04 / SKILLS</span><h2>贯通产品、策略、数据与技术的工具箱。</h2></div><div class="skills-grid"><div class="skill-block reveal"><span class="skill-index">01</span><h3>Programming</h3><div class="skill-list"><span>Python</span><span>C</span></div></div><div class="skill-block reveal delay-1"><span class="skill-index">02</span><h3>Product</h3><div class="skill-list"><span>Figma</span><span>Sketch</span><span>Axure</span><span>墨刀</span></div></div><div class="skill-block reveal"><span class="skill-index">03</span><h3>Data</h3><div class="skill-list"><span>SQL</span><span>Stata</span><span>Pandas</span><span>Mathematica</span></div></div><div class="skill-block reveal delay-1"><span class="skill-index">04</span><h3>Language</h3><div class="skill-list"><span>英语读写 · 优良</span><span>英语听说 · 日常交流</span></div></div></div><div class="awards reveal"><div class="award-label">HONORS</div><div class="award-list"><span>北京市优秀毕业生 · 2026</span><span>北京大学优秀毕业生 · 2026</span><span>国家奖学金 · 2025</span><span>北京大学三好学生标兵 · 2025</span><span>北京大学优秀学生党支部书记 · 2025</span><span>北京大学三等奖学金 · 2023 / 2024</span><span>优秀科研奖 · 2024</span></div></div></section>
 <section id="contact" class="contact container reveal"><div><span class="contact-kicker">LET'S CONNECT</span><h2>一起把复杂问题<br><em>做得更简单。</em></h2></div><div class="contact-right"><a href="mailto:liuzisheng3197@stu.pku.edu.cn">liuzisheng3197@stu.pku.edu.cn</a><a href="https://github.com/zishengliu" target="_blank" rel="noreferrer">github.com/zishengliu ↗</a><p>北京 · 中国</p></div></section>
 </main><footer class="footer container"><span>© 2026 Zisheng Liu</span><span>PRODUCT × DATA × AI × LAW</span></footer><script src="script.js"></script>
+<script>
+(function(){
+  function syncBrandLanguage(){
+    const lang=localStorage.getItem('portfolio-lang')||'zh';
+    document.querySelectorAll('[data-zh][data-en]').forEach(el=>el.textContent=lang==='zh'?el.dataset.zh:el.dataset.en);
+    const labels=document.querySelectorAll('.company');
+    labels.forEach(el=>{if(el.dataset.zh)el.textContent=lang==='zh'?el.dataset.zh:el.dataset.en});
+  }
+  syncBrandLanguage();
+  document.addEventListener('click',function(e){if(e.target.closest('#langToggle'))setTimeout(syncBrandLanguage,20);});
+})();
+</script>
 </body></html>
