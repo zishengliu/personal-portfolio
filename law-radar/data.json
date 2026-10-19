@@ -1,0 +1,42 @@
+{
+  "project": "AI 法规雷达",
+  "generated_at": "2026-10-19 15:55:00 UTC+08:00",
+  "status": "offline_demo",
+  "source_method": "预置官方网页样例；部署后的每日 GitHub Actions 任务将尝试抓取实时 RSS",
+  "schedule": "Daily at 01:15 UTC (09:15 Asia/Singapore)",
+  "source_errors": [],
+  "sources": [],
+  "item_count": 2,
+  "new_count": 0,
+  "seen_ids": [],
+  "items": [
+    {
+      "id": "court-ai-disputes-opinion-20260907",
+      "date": "2026-09-07",
+      "source": "中华人民共和国最高人民法院",
+      "title": "最高法发布《关于依法审理涉人工智能纠纷案件的意见》",
+      "url": "https://www.court.gov.cn/zixun/xiangqing/511101.html",
+      "category": "司法规则与案例",
+      "priority": "高",
+      "description": "最高人民法院发布涉人工智能纠纷案件审理意见，涉及人工智能侵权责任、人格权益与个人信息保护、知识产权、模型训练数据以及 AI 换脸拟声等问题。请打开原文核验具体条文。",
+      "focus": "这是司法裁判规则指引，需结合民法典、个人信息保护法、著作权法等现行规范理解适用。",
+      "query_group": "预置官方来源样例（非实时）",
+      "is_new": false,
+      "is_sample": true
+    },
+    {
+      "id": "cac-registered-genai-20260914",
+      "date": "2026-09-14",
+      "source": "中央网络安全和信息化委员会办公室（中国网信网）",
+      "title": "关于发布生成式人工智能服务已备案信息的公告（2026年7月至8月）",
+      "url": "https://www.cac.gov.cn/2026-09/14/c_1791136833136332.htm",
+      "category": "备案与合规",
+      "priority": "高",
+      "description": "公告涉及生成式人工智能服务备案及应用、功能登记动态，可继续关注服务主体边界和信息公示要求。请打开官方原文核验具体数据及要求。",
+      "focus": "关注生成式人工智能服务备案/登记的主体边界、信息公示义务，以及应用调用模型能力时的登记要求。",
+      "query_group": "预置官方来源样例（非实时）",
+      "is_new": false,
+      "is_sample": true
+    }
+  ]
+}
