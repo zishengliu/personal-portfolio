@@ -477,7 +477,7 @@ class MailBriefingApp:
         row.pack(fill="x", pady=(8, 0))
         ttk.Button(row, text="保存设置", command=self.save).pack(side="left")
         ttk.Button(row, text="测试已启用邮箱", command=self.test_all).pack(side="left", padx=8)
-        ttk.Button(row, text="查看官方邮箱设置说明", command=lambda: webbrowser.open("https://mail.tsinghua.edu.cn/coremail/help/notice.html")).pack(side="right")
+        ttk.Button(row, text="查看官方邮箱设置说明", command=lambda: webbrowser.open("https://mail.tsinghua.edu.cn/coremail/help/clientoption.jsp?locale=zh_CN")).pack(side="right")
         ttk.Label(self.settings_tab, text="密码仅保存在本机系统凭据库；设置文件只保存邮箱地址和同步状态。", foreground="#166534").pack(anchor="w", pady=(10, 0))
 
     def build_inbox_tab(self):
