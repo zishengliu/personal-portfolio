@@ -56,6 +56,7 @@ def user_data_dir() -> Path:
 DATA_DIR = user_data_dir()
 SETTINGS_PATH = DATA_DIR / "settings.json"
 STATE_PATH = DATA_DIR / "state.json"
+DIGEST_PATH = DATA_DIR / "latest_digest.json"
 LOG_PATH = DATA_DIR / "mail-briefing.log"
 
 logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
@@ -101,11 +102,53 @@ def load_state() -> dict:
         state = {}
     state.setdefault("last_uid", {})
     state.setdefault("last_digest_date", "")
+    state.setdefault("pending_digest", [])
     return state
 
 
 def save_state(state: dict) -> None:
     STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _stored_mail(mail: dict) -> dict:
+    """Keep only the minimum metadata needed to show and notify a daily digest."""
+    date_value = mail.get("date")
+    if isinstance(date_value, datetime):
+        date_value = date_value.isoformat()
+    return {
+        "uid": mail.get("uid"),
+        "account_id": mail.get("account_id"),
+        "account_name": mail.get("account_name", ""),
+        "subject": mail.get("subject", "（无主题）"),
+        "sender": mail.get("sender", "未知发件人"),
+        "category": mail.get("category", "个人与其他"),
+        "date": date_value,
+    }
+
+
+def _restore_mail(record: dict) -> dict:
+    mail = dict(record)
+    date_value = mail.get("date")
+    if isinstance(date_value, str):
+        try:
+            mail["date"] = datetime.fromisoformat(date_value)
+        except ValueError:
+            mail["date"] = None
+    return mail
+
+
+def load_digest() -> dict:
+    data = load_json(DIGEST_PATH, {})
+    return data if isinstance(data, dict) else {}
+
+
+def save_digest(mails: list[dict], errors: list[str]) -> None:
+    payload = {
+        "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "mails": [_stored_mail(mail) for mail in mails],
+        "errors": errors,
+    }
+    DIGEST_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def get_secret(account_id: str) -> str | None:
@@ -294,7 +337,7 @@ def send_notification(mails: list[dict], errors: list[str], digest_title: str = 
     logging.info("Check completed: %d new messages; %d account errors", len(mails), len(errors))
 
 
-def do_check(settings: dict, state: dict, notify: bool = True) -> tuple[list[dict], list[str]]:
+def do_check(settings: dict, state: dict, notify: bool = True, daily: bool = False) -> tuple[list[dict], list[str]]:
     all_mails, errors = [], []
     for account in settings["accounts"]:
         if not account.get("enabled"):
@@ -308,12 +351,31 @@ def do_check(settings: dict, state: dict, notify: bool = True) -> tuple[list[dic
             message = f"{account['name']}：{str(exc)}"
             errors.append(message)
             logging.warning("Account %s failed: %s", account["id"], type(exc).__name__)
-    save_state(state)
-    all_mails.sort(key=lambda m: m["date"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
-    if notify:
-        send_notification(all_mails, errors)
-    return all_mails, errors
 
+    # Manual checks queue the metadata for the next scheduled digest instead of consuming it.
+    pending = list(state.get("pending_digest", []))
+    seen = {(item.get("account_id"), item.get("uid")) for item in pending}
+    for mail in all_mails:
+        stored = _stored_mail(mail)
+        key = (stored.get("account_id"), stored.get("uid"))
+        if key not in seen:
+            pending.append(stored)
+            seen.add(key)
+    state["pending_digest"] = pending
+    save_state(state)
+
+    if daily:
+        digest_mails = [_restore_mail(item) for item in pending]
+        save_digest(digest_mails, errors)
+        if notify:
+            send_notification(digest_mails, errors)
+        state["pending_digest"] = []
+        save_state(state)
+    elif notify:
+        send_notification(all_mails, errors)
+
+    all_mails.sort(key=lambda m: m["date"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    return all_mails, errors
 
 def test_account(account: dict) -> str:
     conn = imap_connect(account)
@@ -343,7 +405,7 @@ def background_loop() -> None:
             due = datetime.strptime(settings.get("daily_time", "08:00"), "%H:%M").time()
             configured = any(a.get("enabled") and a.get("email") for a in settings["accounts"])
             if configured and now.time() >= due and state.get("last_digest_date") != now.date().isoformat() and minute_key != last_minute:
-                do_check(settings, state, notify=True)
+                do_check(settings, state, notify=True, daily=True)
                 state = load_state()
                 state["last_digest_date"] = now.date().isoformat()
                 save_state(state)
@@ -364,7 +426,7 @@ class MailBriefingApp:
         self.email_vars = {}
         self.enabled_vars = {}
         self.build_ui()
-        self.render_welcome()
+        self.render_saved_digest()
 
     def build_ui(self):
         wrapper = ttk.Frame(self.root, padding=14)
@@ -436,6 +498,23 @@ class MailBriefingApp:
         ttk.Label(self.inbox_tab, textvariable=self.summary, wraplength=820, justify="left").pack(fill="x", pady=(8, 0))
         self.recent_mails = []
 
+    def render_saved_digest(self):
+        state = load_state()
+        pending = [_restore_mail(item) for item in state.get("pending_digest", [])]
+        if pending:
+            self.show_results(pending, [], title="当前待晨报邮件", warn_errors=False)
+            self.summary.set("当前待晨报邮件（这些邮件会在设定时间汇总通知）：\n" + self.summary.get())
+            return
+        digest = load_digest()
+        if digest:
+            mails = [_restore_mail(item) for item in digest.get("mails", [])]
+            errors = digest.get("errors", [])
+            self.show_results(mails, errors, title="上次晨报", warn_errors=False)
+            generated_at = digest.get("generated_at", "时间未知")
+            self.summary.set(f"上次晨报时间：{generated_at}\n" + self.summary.get())
+            return
+        self.render_welcome()
+
     def render_welcome(self):
         if hasattr(self, "tree"):
             for item in self.tree.get_children():
@@ -502,11 +581,13 @@ class MailBriefingApp:
         self.status.set("正在检查新邮件；邮件较多时可能需要一些时间……")
         def worker():
             state = load_state()
-            mails, errors = do_check(self.settings, state, notify=False)
-            self.root.after(0, lambda: self.show_results(mails, errors))
+            _, errors = do_check(self.settings, state, notify=False, daily=False)
+            updated_state = load_state()
+            pending = [_restore_mail(item) for item in updated_state.get("pending_digest", [])]
+            self.root.after(0, lambda: self.show_results(pending, errors, title="当前待晨报邮件"))
         threading.Thread(target=worker, daemon=True).start()
 
-    def show_results(self, mails, errors):
+    def show_results(self, mails, errors, title="本次新邮件", warn_errors=True):
         self.recent_mails = mails
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -515,11 +596,11 @@ class MailBriefingApp:
             counts[mail["category"]] = counts.get(mail["category"], 0) + 1
             date_text = mail["date"].astimezone().strftime("%m-%d %H:%M") if mail["date"] else "未知"
             self.tree.insert("", "end", values=(mail["category"], mail["account_name"], mail["sender"], mail["subject"], date_text))
-        self.summary.set("本次新邮件：" + ("；".join(f"{k} {v} 封" for k, v in counts.items() if v) or "0 封") +
+        self.summary.set(title + "：" + ("；".join(f"{k} {v} 封" for k, v in counts.items() if v) or "0 封") +
                          ("\n检查失败：" + "；".join(errors) if errors else "") +
                          ("\n分类采用本地关键词规则，不会调用外部 AI 服务。"))
         self.status.set(f"检查完成：{len(mails)} 封新邮件，{len(errors)} 个邮箱出错。")
-        if errors:
+        if errors and warn_errors:
             messagebox.showwarning("部分邮箱检查失败", "\n".join(errors))
 
     def open_webmail(self):
