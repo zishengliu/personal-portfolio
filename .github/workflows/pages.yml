@@ -1,20 +1,17 @@
-name: Deploy portfolio and update AI Law Radar
+name: Deploy personal portfolio to GitHub Pages
 
 on:
   push:
     branches: [main]
-  schedule:
-    # Every day at 01:15 UTC = 09:15 Singapore/Beijing time.
-    - cron: '15 1 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
-  group: pages
+  group: personal-portfolio-pages
   cancel-in-progress: true
 
 jobs:
@@ -24,32 +21,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Update AI Law Radar data
-        run: python scripts/update_law_radar.py
-      - name: Save daily monitoring result
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add law-radar/data.json
-          if ! git diff --cached --quiet; then
-            git commit -m "[skip ci] chore: refresh daily AI law radar data"
-            git push
-          else
-            echo "No data file changes to commit."
-          fi
-      - name: Setup GitHub Pages
+      - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
