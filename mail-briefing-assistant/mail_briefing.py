@@ -340,7 +340,7 @@ def send_notification(mails: list[dict], errors: list[str], digest_title: str = 
 def do_check(settings: dict, state: dict, notify: bool = True, daily: bool = False) -> tuple[list[dict], list[str]]:
     all_mails, errors = [], []
     for account in settings["accounts"]:
-        if not account.get("enabled"):
+        if not account.get("enabled") or not account.get("email"):
             continue
         try:
             mails, new_last_uid = check_account(account, state)
@@ -556,9 +556,9 @@ class MailBriefingApp:
     def test_all(self):
         if not self.save(quiet=True):
             return
-        accounts = [a for a in self.settings["accounts"] if a.get("enabled")]
+        accounts = [a for a in self.settings["accounts"] if a.get("enabled") and a.get("email")]
         if not accounts:
-            messagebox.showwarning("尚未启用邮箱", "请至少启用一个邮箱。")
+            messagebox.showwarning("尚未配置邮箱", "请至少启用一个邮箱并填写邮箱地址。")
             return
         self.status.set("正在测试邮箱连接……")
         def worker():
