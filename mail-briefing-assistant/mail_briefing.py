@@ -328,21 +328,8 @@ def test_account(account: dict) -> str:
 
 
 def background_loop() -> None:
+    """Wait for the configured local morning time, then produce one digest per day."""
     logging.info("Background scheduler started")
-    settings = load_settings()
-    if not any(a.get("enabled") and a.get("email") for a in settings["accounts"]):
-        logging.warning("No mail account configured yet; open Mail Briefing Assistant from the Start menu")
-    else:
-        state = load_state()
-        _, _ = do_check(settings, state, notify=True)
-        now = datetime.now()
-        try:
-            due_time = datetime.strptime(settings.get("daily_time", "08:00"), "%H:%M").time()
-            if now.time() >= due_time:
-                state["last_digest_date"] = now.date().isoformat()
-                save_state(state)
-        except ValueError:
-            pass
     last_minute = ""
     while True:
         try:
@@ -351,15 +338,16 @@ def background_loop() -> None:
             state = load_state()
             minute_key = now.strftime("%Y-%m-%d %H:%M")
             due = datetime.strptime(settings.get("daily_time", "08:00"), "%H:%M").time()
-            if now.time() >= due and state.get("last_digest_date") != now.date().isoformat() and minute_key != last_minute:
+            configured = any(a.get("enabled") and a.get("email") for a in settings["accounts"])
+            if configured and now.time() >= due and state.get("last_digest_date") != now.date().isoformat() and minute_key != last_minute:
                 do_check(settings, state, notify=True)
+                state = load_state()
                 state["last_digest_date"] = now.date().isoformat()
                 save_state(state)
                 last_minute = minute_key
         except Exception as exc:
             logging.warning("Scheduler loop error: %s", type(exc).__name__)
         time.sleep(30)
-
 
 class MailBriefingApp:
     def __init__(self, root: tk.Tk):
@@ -440,6 +428,7 @@ class MailBriefingApp:
             self.tree.heading(col, text=headings[col])
             self.tree.column(col, width=widths[col], minwidth=75, anchor="w")
         self.tree.pack(fill="both", expand=True)
+        self.tree.bind("<Double-1>", lambda event: self.open_webmail())
         self.summary = tk.StringVar(value="点击“立即检查新邮件”获取分类摘要。")
         ttk.Label(self.inbox_tab, textvariable=self.summary, wraplength=820, justify="left").pack(fill="x", pady=(8, 0))
         self.recent_mails = []
