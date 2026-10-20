@@ -64,10 +64,12 @@ function renderGitHubProjects(lang){
   const knownRadar=repos.some(r=>r.name==='ai-law-radar');
   if(!knownRadar){
     repos.push({
-      name:'ai-law-radar',description:'',language:'Python',stargazers_count:0,forks_count:0,
-      html_url:'https://github.com/'+GITHUB_OWNER+'/personal-portfolio/tree/main/law-radar',
-      homepage:'https://zishengliu.github.io/personal-portfolio/law-radar/',
-      default_branch:'main',updated_at:'2026-10-19T00:00:00Z',_transitionFallback:true
+      name:'ai-law-radar',
+      description:'持续追踪生成式人工智能、算法治理、AI 司法与监管政策，并生成法律监控简报。',
+      language:'Python',stargazers_count:0,forks_count:0,
+      html_url:'https://github.com/'+GITHUB_OWNER+'/ai-law-radar',
+      homepage:'https://'+GITHUB_OWNER+'.github.io/ai-law-radar/',
+      default_branch:'main',updated_at:''
     });
   }
   if(!repos.length){
@@ -84,7 +86,7 @@ function renderGitHubProjects(lang){
       const icon=document.createElement('div');icon.className='project-icon';
       icon.textContent=repo.name==='ai-law-radar'?'⚖':repo.name==='mail-briefing-assistant'?'✉':repo.name==='personal-portfolio'?'↗':'⌘';
       const tag=document.createElement('span');tag.className='project-tag';
-      tag.textContent=repo._transitionFallback?(lang==='en'?'AI × LAW · MIGRATION PREPARED':'AI × 法律 · 独立仓库待创建'):[repo.language||'GitHub Project', ...(repo.topics||[]).slice(0,2)].join(' · ');
+      tag.textContent=repo.name==='ai-law-radar'?'AI × LAW':([repo.language||'GitHub Project', ...(repo.topics||[]).slice(0,2)].join(' · '));
       const title=document.createElement('h3');title.textContent=meta.title;
       const desc=document.createElement('p');desc.textContent=meta.description;
       const metaLine=document.createElement('div');metaLine.className='project-meta';
@@ -100,8 +102,7 @@ function renderGitHubProjects(lang){
         const a=document.createElement('a');a.textContent=label;a.href=url;a.target='_blank';a.rel='noopener noreferrer';links.appendChild(a);
       }
       let home=repo.homepage&&/^https:\/\//i.test(repo.homepage)?repo.homepage:'';
-      if(repo.name==='ai-law-radar'&&!repo._transitionFallback&&!home)home='https://'+GITHUB_OWNER+'.github.io/ai-law-radar/';
-      if(repo._transitionFallback)home='https://zishengliu.github.io/personal-portfolio/law-radar/';
+      if(repo.name==='ai-law-radar')home='https://'+GITHUB_OWNER+'.github.io/ai-law-radar/';
       addLink(home?(lang==='en'?'Open project ↗':'打开项目 ↗'):(lang==='en'?'View repository ↗':'查看仓库 ↗'),home||repo.html_url);
       addLink(lang==='en'?'Source code ↗':'源代码 ↗',repo.html_url);
       addLink(lang==='en'?'README ↗':'项目说明 ↗',repo.html_url+'/blob/'+(repo.default_branch||'main')+'/README.md');
