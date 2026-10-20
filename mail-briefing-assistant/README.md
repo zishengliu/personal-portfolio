@@ -40,7 +40,7 @@
 
 ### 清华大学学生邮箱
 
-IMAP 地址为 `mails.tsinghua.edu.cn`，SSL 端口 `993`。请按邮箱网页端的客户端设置/安全设置生成或配置客户端专用密码；具体权限可能受学校账户策略影响。
+IMAP 地址为 `mails.tsinghua.edu.cn`，SSL 端口 `993`。请按邮箱网页端的客户端设置/安全设置生成或配置客户端专用密码；具体权限可能受学校账户策略影响。详见[清华大学邮箱官方客户端设置说明](https://mail.tsinghua.edu.cn/coremail/help/clientoption.jsp?locale=zh_CN)。
 
 ## 隐私与限制
 
