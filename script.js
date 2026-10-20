@@ -123,13 +123,12 @@ async function loadGitHubProjects(){
     if(!response.ok)throw new Error('GitHub API HTTP '+response.status);
     const data=await response.json();
     if(!Array.isArray(data))throw new Error('Unexpected GitHub API response');
-    githubRepos=data.filter(r=>r&&r.name&&r.html_url&&r.private!==true);
+    githubRepos=data.filter(r=>r&&r.name&&r.name!=='personal-portfolio'&&r.html_url&&r.private!==true);
     projectsError='';
   }catch(error){
     projectsError=String(error&&error.message||error);
     githubRepos=[
-      {name:'mail-briefing-assistant',description:'',language:'Python',html_url:'https://github.com/'+GITHUB_OWNER+'/mail-briefing-assistant',homepage:'',default_branch:'main',updated_at:''},
-      {name:'personal-portfolio',description:'',language:'HTML',html_url:'https://github.com/'+GITHUB_OWNER+'/personal-portfolio',homepage:'https://zishengliu.github.io/personal-portfolio/',default_branch:'main',updated_at:''}
+      {name:'mail-briefing-assistant',description:'',language:'Python',html_url:'https://github.com/'+GITHUB_OWNER+'/mail-briefing-assistant',homepage:'',default_branch:'main',updated_at:''}
     ];
   }finally{
     projectsLoading=false;
