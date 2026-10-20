@@ -277,11 +277,14 @@ def send_notification(mails: list[dict], errors: list[str], digest_title: str = 
         logging.info("Daily check completed: no new messages")
         return
     counts = {category: sum(1 for mail in mails if mail["category"] == category) for category in CATEGORY_ORDER}
-    summary = " · ".join(f"{name} {count}" for name, count in counts.items() if count)
-    if not summary:
-        summary = "没有发现新邮件"
+    count_line = " · ".join(f"{name} {count}" for name, count in counts.items() if count)
+    details = [f"{mail['category']}｜{mail['sender']}: {mail['subject']}" for mail in mails[:3]]
+    summary_parts = [part for part in (count_line, "\\n".join(details)) if part]
+    if len(mails) > 3:
+        summary_parts.append(f"另有 {len(mails) - 3} 封，请打开助手查看")
     if errors:
-        summary += f"；{len(errors)} 个邮箱检查失败，请打开助手查看"
+        summary_parts.append(f"{len(errors)} 个邮箱检查失败，请打开助手查看")
+    summary = "\\n".join(summary_parts) or "没有发现新邮件"
     title = f"{digest_title}：发现 {len(mails)} 封新邮件" if mails else "邮件晨报：部分邮箱检查失败"
     try:
         from winotify import Notification
