@@ -34,6 +34,10 @@ function textOrFallback(repo,lang){
       zh:['邮件助手','适用于 Gmail、QQ 邮箱与清华邮箱的 Windows 桌面悬浮小插件。汇总并分类新邮件，支持下拉查看详情与每日定时运行。'],
       en:['Mail Assistant','A Windows desktop floating widget for Gmail, QQ Mail and Tsinghua email with expandable message details and daily scheduled summaries.']
     },
+    'mail-assistant':{
+      zh:['邮件助手','适用于 Gmail、QQ 邮箱与清华邮箱的 Windows 桌面悬浮小插件。汇总并分类新邮件，支持下拉查看详情与每日定时运行。'],
+      en:['Mail Assistant','A Windows desktop floating widget for Gmail, QQ Mail and Tsinghua email with expandable message details and daily scheduled summaries.']
+    },
     'personal-portfolio':{
       zh:['个人主页与作品集','个人网站，集中展示教育经历、实习经历、研究成果与开源项目。'],
       en:['Personal Portfolio','A personal website showcasing education, experience, research and open-source projects.']
